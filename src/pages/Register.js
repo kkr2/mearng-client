@@ -1,41 +1,56 @@
-import React ,{useState}from 'react'
+import React ,{useState,useContext}from 'react'
 import {Form, Button} from 'semantic-ui-react'
 import gql from 'graphql-tag'
-
+import {useForm} from "../util/hooks"
 import {useMutation} from '@apollo/react-hooks'
+import {AuthContext} from '../context/auth'
 
- const Register = ()=> {
+ const Register = (props)=> {
 
-    const [values,setValues] =useState({
-        username:'',
-        email:'',
-        password:'',
-        confirmPassword:''
-    }) 
-    const onChange = (e) => {
-        setValues({...values,[e.target.name]: e.target.value})
-    }
+  const context = useContext(AuthContext);
+  const [errors, setErrors] = useState({});
+
+  const initialState = {
+    username:'',
+    email:'',
+    password:'',
+    confirmPassword:''
+}
+
+const{onChange,onSubmit,values}= useForm(()=>addUser(),initialState)
+
+
+
+    // const onChange = (e) => {
+    //     setValues({...values,[e.target.name]: e.target.value})
+    // }
     const[addUser,{loading}]= useMutation(REGISTER_USER,{
         update(_,result){
-            console.log(result);
+            // console.log(result);
+            context.login(result.data.register)
+            props.history.push('/');
+        },
+        onError(err) {
+          setErrors(err.graphQLErrors[0].extensions.exception.errors);
         },
         variables:values
     })
-    const onSubmit = (e) => {
-        e.preventDefault()
-        addUser()
-    }
+    // const onSubmit = (e) => {
+    //     e.preventDefault()
+    //     addUser()
+    // }
     
 
     return (
         <div className="form-container">
-            <Form onSubmit={onSubmit} noValidate>
+            <Form onSubmit={onSubmit} noValidate className={loading ? 'loading' : ''}>
                 <Form.Input
                 label="Username"
                 placeholder="Username.."
                 name="username"
                 type="text"
                 value={values.username}
+                error={errors.username ? true : false}
                 onChange={onChange}
                 />
                 <Form.Input
@@ -44,6 +59,7 @@ import {useMutation} from '@apollo/react-hooks'
                 name="email"
                 type="text"
                 value={values.email}
+                error={errors.email ? true : false}
                 onChange={onChange}
                 />
                 <Form.Input
@@ -52,6 +68,7 @@ import {useMutation} from '@apollo/react-hooks'
                 name="password"
                 type="password"
                 value={values.password}
+                error={errors.password ? true : false}
                 onChange={onChange}
                 />
                 <Form.Input
@@ -60,12 +77,22 @@ import {useMutation} from '@apollo/react-hooks'
                 name="confirmPassword"
                 type="password"
                 value={values.confirmPassword}
+                error={errors.confirmPassword ? true : false}
                 onChange={onChange}
                 />
                 <Button type="submit" primary>
                     Register
                 </Button>
             </Form>
+            {Object.keys(errors).length > 0 && (
+        <div className="ui error message">
+          <ul className="list">
+            {Object.values(errors).map((value) => (
+              <li key={value}>{value}</li>
+            ))}
+          </ul>
+        </div>
+      )}
         </div>
     )
 }
@@ -94,7 +121,5 @@ const REGISTER_USER = gql`
     }
   }
 `;
-
-
 
 export default Register;

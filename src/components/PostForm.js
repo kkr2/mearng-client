@@ -10,7 +10,7 @@ import {FETCH_POSTS} from '../util/graphql'
         body:''
     });
     const[createPost,{error}]=useMutation(CREATE_POST_MUTATION,{
-
+        
         
         update(proxy,result){
             
@@ -25,14 +25,18 @@ import {FETCH_POSTS} from '../util/graphql'
             values.body='';
         },
         
+        onError() {
+        //   setErrors(err.graphQLErrors[0].extensions.exception.errors);
+        },
+        
         variables:values
     })
 
-    
+    // const [errors, setErrors] = useState({});
 
     return (
         
-        
+        <div>
         <Form onSubmit={onSubmit}>
             <h2>Create a Post</h2>
             <Form.Field>
@@ -50,7 +54,15 @@ import {FETCH_POSTS} from '../util/graphql'
             </Form.Field>
             
             </Form>
-          
+            {error && (
+                <div className="ui error message" style={{ marginBottom: 20 }}>
+                    <ul className="list">
+                        <li>{error.graphQLErrors[0].message}</li>
+                    </ul>
+                </div>
+             )}
+
+          </div>
     
   );
 }

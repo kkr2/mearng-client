@@ -12,7 +12,8 @@ import {AuthContext} from '../context/auth'
     const context = useContext(AuthContext);
 
 
-    const{onChange,onSubmit,values}= useForm(()=>loginUser(),{username:'',password:''})
+    const{onChange,onSubmit,values}= useForm(()=>loginUser(),{username:'',password:''});
+    
     const [errors, setErrors] = useState({});
     
     const[loginUser,{loading}]= useMutation(LOGIN_USER,{
